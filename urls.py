@@ -23,6 +23,8 @@ import backendsnaps.views as views
 
 router = routers.DefaultRouter()
 router.register('users', views.UserViewSet)
+router.register('events', views.EventViewSet)
+router.register('drink_events', views.DrinkEventViewSet)
 
 
 urlpatterns = [
