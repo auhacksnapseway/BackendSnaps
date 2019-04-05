@@ -19,10 +19,16 @@ class Event(models.Model):
 	owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_events')
 	users = models.ManyToManyField(User, related_name='events')
 
+	def __str__(self):
+		return f'{self.name} ({self.start_datetime.date()})'
+
 
 class DrinkEvent(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='drink_events')
 	event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='drink_events')
 
 	datetime = models.DateTimeField()
+
+	def __str__(self):
+		return f'{self.user} ({self.datetime})'
 
