@@ -14,7 +14,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 class EventSerializer(serializers.HyperlinkedModelSerializer):
 	class Meta:
 		model = Event
-		fields = ('start_datetime', 'end_datetime', 'owner', 'users')
+		fields = ('start_datetime', 'end_datetime', 'name', 'owner', 'users')
 
 
 class DrinkEventSerializer(serializers.HyperlinkedModelSerializer):

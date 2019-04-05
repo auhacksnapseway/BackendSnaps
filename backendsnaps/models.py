@@ -14,6 +14,8 @@ class Event(models.Model):
 	start_datetime = models.DateTimeField(auto_now_add=True)
 	end_datetime = models.DateTimeField(blank=True, null=True)
 
+	name = models.TextField()
+
 	owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_events')
 	users = models.ManyToManyField(User, related_name='events')
 
