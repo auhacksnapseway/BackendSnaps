@@ -24,6 +24,12 @@ class DrinkEventViewSet(viewsets.ModelViewSet):
 	serializer_class = DrinkEventSerializer
 
 	def get_queryset(self):
-		user = User.objects.get(id=self.kwargs['user'])
-		event = Event.objects.get(id=self.kwargs['event'])
-		return user.get_drink_events(event)
+		qs = DrinkEvent.objects
+
+		filters = ['user', 'event']
+
+		for k in filters:
+			if k in self.request.GET:
+				qs = qs.filter(**{k: self.request.GET[k]})
+
+		return qs
