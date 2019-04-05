@@ -8,7 +8,7 @@ from .models import Event, DrinkEvent
 class UserSerializer(serializers.HyperlinkedModelSerializer):
 	class Meta:
 		model = get_user_model()
-		fields = ('username',)
+		fields = ('username', 'events', 'drink_events')
 
 
 class EventSerializer(serializers.HyperlinkedModelSerializer):
