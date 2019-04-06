@@ -14,6 +14,7 @@ ipython = "^7.4"
 werkzeug = "^0.15.2"
 django-cors-headers = "^2.5"
 python-dotenv = "^0.10.1"
+gunicorn = "^19.9"
 
 [tool.poetry.dev-dependencies]
 
