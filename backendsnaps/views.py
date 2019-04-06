@@ -60,6 +60,7 @@ class EventViewSet(viewsets.ModelViewSet):
 
         return Response({'id': event.id})
 
+
     @action(detail=True, methods=['post'])
     def join(self, request, pk=None):
         event = self.get_object()

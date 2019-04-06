@@ -1,3 +1,5 @@
+import random
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.utils import timezone
@@ -39,6 +41,24 @@ class Event(models.Model):
     def is_stopped(self):
         return self.end_datetime is not None
 
+    def update_owner(self):
+        latest_drink_event = self.owner.drink_events.order_by('datetime').last()
+        one_hour_extra = timezone.now() + timezone.timedelta(hours=1)
+        diff_minutes = (one_hour_extra - latest_drink_event.datetime).seconds // 60
+        chad_check = random.uniform(59.5, 120.5)
+        if diff_minutes < chad_check:
+            event_participants = self.users.all()
+            best_score = 0;
+            best_performer = None
+            for participant in event_participants:
+                cur_score = participant.get_score(self)
+                if best_score < cur_score and participant != self.owner:
+                    best_score = cur_score
+                    best_performer = participant
+            #owner should be participant
+            if best_performer is not None:
+                self.owner = best_performer
+
 
 class DrinkEvent(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='drink_events')
@@ -49,3 +69,6 @@ class DrinkEvent(models.Model):
     def __str__(self):
         return f'{self.user} ({self.datetime})'
 
+    def save(self, **kwargs):
+        super().save(**kwargs)
+        self.event.update_owner()
