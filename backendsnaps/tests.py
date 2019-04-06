@@ -1,5 +1,6 @@
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 from .models import Event
 
@@ -12,12 +13,9 @@ def create_test_user():
 	user.set_password('test')
 	user.save()
 
-	user2 = User.objects.create(username="test2")
-	user2.set_password('test')
-	user2.save()
 
 
-def get_test_token(t):
+def get_test_token_user(t):
 	create_test_user()
 
 	c = Client()
@@ -28,14 +26,18 @@ def get_test_token(t):
 	return r.json()['token']
 
 
+
 class LoginTestCase(TestCase):
+	def setUp(self):
+		token = get_test_token_user(self)
+
 	def test_login(self):
-		get_test_token(self)
+		return None
 
 
 class EventTestCase(TestCase):
 	def test_events(self):
-		token = get_test_token(self)
+		token = get_test_token_user(self)
 		event = Event.objects.create(name='foo', owner=User.objects.get(username='test'))
 
 		c = Client()
@@ -43,3 +45,17 @@ class EventTestCase(TestCase):
 
 		self.assertEqual(r.status_code, 200)
 		self.assertTrue(r.json()['success'])
+
+
+class DrinkEventTestCase(TestCase):
+	def test_drink_events(self):
+		token = get_test_token_user(self)
+		event = Event.objects.create(name='foo', owner=User.objects.get(username='test'))
+
+		c = Client()
+		r = c.post(f'/api/events/{event.id}/create_drinkevent/', HTTP_AUTHORIZATION=f'Token {token}')
+
+		self.assertEqual(r.status_code, 200)
+		self.assertTrue(r.json()['success'])
+
+
