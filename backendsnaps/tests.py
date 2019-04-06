@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 
-from rest_framework.test import APIRequestFactory
+from .models import Event
 
 
 User = get_user_model()
@@ -13,27 +13,29 @@ def create_test_user():
 	user.save()
 
 
-def get_test_token():
+def get_test_token(t):
 	create_test_user()
 
 	c = Client()
 	r = c.post('/api-token-auth/', {'username': 'test', 'password': 'test'})
 
-	self.assetEqual(r.status_code, 200)
+	t.assertEqual(r.status_code, 200)
 
-	return r.json['token']
+	return r.json()['token']
 
 
 class LoginTestCase(TestCase):
 	def test_login(self):
-		get_test_token()
+		get_test_token(self)
 
 
 class EventTestCase(TestCase):
-	def test_join(self):
-		token = get_test_token()
-		event = Event.objects.create(name='foo')
+	def test_events(self):
+		token = get_test_token(self)
+		event = Event.objects.create(name='foo', owner=User.objects.get(username='test'))
 
 		c = Client()
+		r = c.post(f'/api/events/{event.id}/join/', HTTP_AUTHORIZATION=f'Token {token}')
 
-		c.post(HTTP_Authorization=f'Token {token}'))
+		self.assertEqual(r.status_code, 200)
+		self.assertTrue(r.json()['success'])
