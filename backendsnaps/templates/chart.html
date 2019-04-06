@@ -10,6 +10,7 @@
 	<script>
 		var colors = ['006BA4', 'FF800E', 'ABABAB', '595959', '5F9ED1', 'C85200', '898989', 'A2C8EC', 'FFBC79', 'CFCFCF'];
 
+		var user_data = JSON.parse('{{user_data | escapejs}}');
 		var event_data = JSON.parse('{{event_data | escapejs}}');
 
 		var drink_events = event_data['drink_events'];
@@ -19,37 +20,40 @@
 		});
 
 		var usernames = {};
-		for (var i = 0; i < event_data.users.length; i++) {
-			var user = event_data.users[i];
+		for (var i = 0; i < user_data.length; i++) {
+			var user = user_data[i];
 			usernames[user.id] = user.username;
 		}
 
-		var user_index = {};
+		var user_indices = {};
 		var datasets = [];
 
 		for (var i = 0; i < drink_events.length; i++) {
 			var user_id = drink_events[i].user;
 			var date = new Date(drink_events[i].datetime);
 
-			if (!user_index.hasOwnProperty(user_id)) {
-				user_index[user_id] = datasets.length;
+			var user_index;
+			if (!user_indices.hasOwnProperty(user_id)) {
+				user_index = user_indices[user_id] = datasets.length;
+
+				var color = '#' + colors[user_index];
+
 				datasets.push({
 					label: usernames[user_id],
 					showLine: true,
 					fill: false,
-					pointBorderColor: '#' + colors[user_index[user]],
-					pointBackgroundColor: '#' + colors[user_index[user]],
-					backgroundColor: '#' + colors[user_index[user]],
-					borderColor: '#' + colors[user_index[user]],
+					borderColor: color,
 					data: [],
 				});
+			} else {
+				user_index = user_indices[user_id];
 			}
 
-			var user_data = datasets[user_index[user_id]].data;
+			var data = datasets[user_index].data;
 
-			user_data.push({
+			data.push({
 				x: date,
-				y: user_data.length + 1,
+				y: data.length + 1,
 			});
 		}
 

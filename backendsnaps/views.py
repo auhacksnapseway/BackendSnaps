@@ -81,8 +81,18 @@ class DrinkEventViewSet(viewsets.ModelViewSet):
 
         return qs
 
+def get_user_data():
+    factory = APIRequestFactory()
+    user = User.objects.get(username='test')
+    view = UserViewSet.as_view({'get': 'list'})
 
-def index(request):
+    request = factory.get('/users/')
+    force_authenticate(request, user=user)
+    response = view(request)
+    return response.data
+
+
+def get_event_data():
     factory = APIRequestFactory()
     user = User.objects.get(username='test')
     view = EventViewSet.as_view({'get': 'retrieve'})
@@ -90,10 +100,13 @@ def index(request):
     request = factory.get('/events/')
     force_authenticate(request, user=user)
     response = view(request, pk=1)
-    data = response.data
+    return response.data
 
+
+def index(request):
     context = {
-        'event_data': json.dumps(data),
+        'user_data': json.dumps(get_user_data()),
+        'event_data': json.dumps(get_event_data()),
     }
 
     return render(request, 'chart.html', context)
