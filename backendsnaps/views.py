@@ -28,6 +28,10 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects
     serializer_class = UserSerializer
 
+    @action(detail=False, methods=['get'])
+    def me(self, request):
+        return Response(UserSerializer(request.user).data)
+
 
 class EventViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
