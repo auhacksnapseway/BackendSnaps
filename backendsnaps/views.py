@@ -31,8 +31,7 @@ class EventViewSet(viewsets.ModelViewSet):
 	queryset = Event.objects
 	serializer_class = EventSerializer
 
-	@action(detail=False, methods=['post'])
-	def create_event(self, request):
+	def create(self, request):
 		s = CreateEventSerializer(data=request.data)
 		if not s.is_valid():
 			return Response({'success': False})
@@ -43,17 +42,17 @@ class EventViewSet(viewsets.ModelViewSet):
 		return Response({'success': True})
 
 	@action(detail=True, methods=['post'])
-	def join_event(self, request, pk=None):
+	def join(self, request, pk=None):
 		self.get_object().users.add(request.user)
 		return Response({'success': True})
 
 	@action(detail=True, methods=['post'])
-	def leave_event(self, request, pk=None):
+	def leave(self, request, pk=None):
 		self.get_object().users.remove(request.user)
 		return Response({'success': True})
 
 	@action(detail=True, methods=['post'])
-	def stop_event(self, request, pk=None):
+	def stop(self, request, pk=None):
 		self.get_object().stop()
 		return Response({'success': True})
 
