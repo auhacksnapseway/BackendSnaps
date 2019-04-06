@@ -48,6 +48,11 @@ class EventViewSet(viewsets.ModelViewSet):
 		self.get_object().stop()
 		return Response({'success': True})
 
+	@action(detail=True, methods=['post'])
+	def create_drinkevent(self, request, pk=None):
+		DrinkEvent.objects.create(user=request.user, event=self.get_object())
+		return Response({'success': True})
+
 
 class DrinkEventViewSet(viewsets.ModelViewSet):
 	queryset = DrinkEvent.objects
