@@ -1,37 +1,45 @@
 import random
 
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
 from django.utils import timezone
 
 
-class User(AbstractUser):
-	def get_drink_events(self, event):
-		return DrinkEvent.objects.filter(user=self, event=event)
+class CustomUserManager(UserManager):
+    def get_by_natural_key(self, username):
+        case_insensitive_username_field = '{}__iexact'.format(self.model.USERNAME_FIELD)
+        return self.get(**{case_insensitive_username_field: username})
 
-	def get_score(self, event):
-		return self.get_drink_events(event).count()
+
+class User(AbstractUser):
+    objects = CustomUserManager()
+
+    def get_drink_events(self, event):
+        return DrinkEvent.objects.filter(user=self, event=event)
+
+    def get_score(self, event):
+        return self.get_drink_events(event).count()
 
 
 class Event(models.Model):
-	start_datetime = models.DateTimeField(auto_now_add=True)
-	end_datetime = models.DateTimeField(blank=True, null=True)
+    start_datetime = models.DateTimeField(auto_now_add=True)
+    end_datetime = models.DateTimeField(blank=True, null=True)
 
-	name = models.TextField()
+    name = models.TextField()
 
-	owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_events')
-	users = models.ManyToManyField(User, related_name='events')
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_events')
+    users = models.ManyToManyField(User, related_name='events')
 
-	def __str__(self):
-		return f'{self.name} ({self.start_datetime.date()})'
+    def __str__(self):
+        return f'{self.name} ({self.start_datetime.date()})'
 
-	def stop(self):
-		self.end_datetime = timezone.now()
-		self.save()
+    def stop(self):
+        self.end_datetime = timezone.now()
+        self.save()
 
-	@property
-	def is_stopped(self):
-		return self.end_datetime is not None
+    @property
+    def is_stopped(self):
+        return self.end_datetime is not None
 
 	def update_owner(self):
 		latest_drink_event = self.owner.drink_events.order_by('datetime').last()
@@ -54,13 +62,13 @@ class Event(models.Model):
 #todo: 1)owner is not None 2) move prev owner into participants 3) check users is not None, #do nothing if owner is highest
 
 class DrinkEvent(models.Model):
-	user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='drink_events')
-	event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='drink_events')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='drink_events')
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='drink_events')
 
-	datetime = models.DateTimeField(auto_now_add=True)
+    datetime = models.DateTimeField(auto_now_add=True)
 
-	def __str__(self):
-		return f'{self.user} ({self.datetime})'
+    def __str__(self):
+        return f'{self.user} ({self.datetime})'
 
 	def save(self, **kwargs):
 		super().save(**kwargs)
