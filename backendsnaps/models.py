@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
 
 
 class User(AbstractUser):
@@ -21,6 +22,14 @@ class Event(models.Model):
 
 	def __str__(self):
 		return f'{self.name} ({self.start_datetime.date()})'
+
+	def stop(self):
+		self.end_datetime = timezone.now()
+		self.save()
+
+	@property
+	def is_stopped(self):
+		return self.end_datetime is not None
 
 
 class DrinkEvent(models.Model):

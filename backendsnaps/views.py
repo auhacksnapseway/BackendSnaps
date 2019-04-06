@@ -43,6 +43,11 @@ class EventViewSet(viewsets.ModelViewSet):
 		self.get_object().users.remove(request.user)
 		return Response({'success': True})
 
+	@action(detail=True, methods=['post'])
+	def stop_event(self, request, pk=None):
+		self.get_object().stop()
+		return Response({'success': True})
+
 
 class DrinkEventViewSet(viewsets.ModelViewSet):
 	queryset = DrinkEvent.objects
