@@ -44,6 +44,7 @@ class EventViewSet(viewsets.ModelViewSet):
 
         return Response({'success': True, 'id': event.id})
 
+
     @action(detail=True, methods=['post'])
     def join(self, request, pk=None):
         event = self.get_object()
@@ -88,6 +89,7 @@ class DrinkEventViewSet(viewsets.ModelViewSet):
                 qs = qs.filter(**{k: self.request.GET[k]})
 
         return qs
+
 
 def get_user_data():
     factory = APIRequestFactory()

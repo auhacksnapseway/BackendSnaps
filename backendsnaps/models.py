@@ -32,6 +32,7 @@ class Event(models.Model):
 		return self.end_datetime is not None
 
 
+
 class DrinkEvent(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='drink_events')
 	event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='drink_events')
