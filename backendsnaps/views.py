@@ -1,9 +1,11 @@
 import json
+import datetime
 
+from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.shortcuts import render
 
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -23,10 +25,24 @@ class CreateOrAuthenticated(IsAuthenticated):
         return super().has_permission(request, view)
 
 
+class OwnsEvent(IsAuthenticated):
+    def has_object_permission(self, request, view, obj):
+        return obj.owner == request.user
+
+
+class InEvent(IsAuthenticated):
+    def has_object_permission(self, request, view, obj):
+        return obj.users.filter(pk=request.user.id).exists()
+
+
 class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (CreateOrAuthenticated,)
     queryset = User.objects
     serializer_class = UserSerializer
+
+    @action(detail=False, methods=['get'])
+    def me(self, request):
+        return Response(UserSerializer(request.user).data)
 
 
 class EventViewSet(viewsets.ModelViewSet):
@@ -37,41 +53,60 @@ class EventViewSet(viewsets.ModelViewSet):
     def create(self, request):
         s = CreateEventSerializer(data=request.data)
         if not s.is_valid():
-            return Response({'success': False})
+            return Response({'detail': 'name parameter is probably bad'}, status=status.HTTP_400_BAD_REQUEST)
 
         event = Event.objects.create(owner=request.user, name=s.validated_data['name'])
         event.users.add(request.user)
 
-        return Response({'success': True, 'id': event.id})
+        return Response({'id': event.id})
 
 
     @action(detail=True, methods=['post'])
     def join(self, request, pk=None):
         event = self.get_object()
         if event.users.filter(pk=request.user.id).exists():
-            return Response({'success': False, 'error': 'User has already joined the event'})
+            return Response({'detail': 'User has already joined the event'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if event.is_stopped:
+            return Response({'detail': 'Event has ended'}, status=status.HTTP_400_BAD_REQUEST)
 
         event.users.add(request.user)
-        return Response({'success': True})
+        return Response({})
 
     @action(detail=True, methods=['post'])
     def leave(self, request, pk=None):
         event = self.get_object()
         if not event.users.filter(pk=request.user.id).exists():
-            return Response({'success': False, 'error': 'User is not in the event'})
+            return Response({'detail': 'User is not in the event'}, status=status.HTTP_400_BAD_REQUEST)
 
         event.users.remove(request.user)
-        return Response({'success': True})
+        return Response({})
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], permission_classes=(OwnsEvent,))
     def stop(self, request, pk=None):
-        self.get_object().stop()
-        return Response({'success': True})
+        event = self.get_object()
+        if event.is_stopped:
+            return Response({'detail': 'Event has already been stopped'}, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=True, methods=['post'])
+        event.stop()
+        return Response({})
+
+    @action(detail=True, methods=['post'], permission_classes=(InEvent,))
     def create_drinkevent(self, request, pk=None):
+        MINIMUM_DURATION = datetime.timedelta(seconds=10)
+
+        event = self.get_object()
+        if event.is_stopped:
+            return Response({'detail': 'Event has ended'}, status=status.HTTP_400_BAD_REQUEST)
+
+        drink_events = request.user.get_drink_events(event).order_by('datetime')
+        if drink_events.exists():
+            last_dt = drink_events.last().datetime
+            if timezone.now() - last_dt < MINIMUM_DURATION:
+                return Response({'detail': 'Too soon, try again later'}, status=status.HTTP_400_BAD_REQUEST)
+
         drinkevent = DrinkEvent.objects.create(user=request.user, event=self.get_object())
-        return Response({'success': True, 'id': drinkevent.id})
+        return Response({'id': drinkevent.id})
 
 
 class DrinkEventViewSet(viewsets.ModelViewSet):

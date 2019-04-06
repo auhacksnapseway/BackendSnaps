@@ -8,7 +8,7 @@ class User(AbstractUser):
 		return DrinkEvent.objects.filter(user=self, event=event)
 
 	def get_score(self, event):
-		return len(self.get_drink_events(event))
+		return self.get_drink_events(event).count()
 
 
 class Event(models.Model):
