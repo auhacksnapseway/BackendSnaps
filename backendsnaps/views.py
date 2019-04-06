@@ -125,6 +125,10 @@ class DrinkEventViewSet(viewsets.ModelViewSet):
         return qs
 
 
+    def create(self, request):
+        return Response({'detail': 'Not allowed'}, status=status.HTTP_400_BAD_REQUEST)
+
+
 def get_user_data():
     factory = APIRequestFactory()
     user = User.objects.get(username='test')
