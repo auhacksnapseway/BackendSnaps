@@ -1,5 +1,7 @@
 import json
+import datetime
 
+from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.shortcuts import render
 
@@ -90,9 +92,17 @@ class EventViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], permission_classes=(InEvent,))
     def create_drinkevent(self, request, pk=None):
+        MINIMUM_DURATION = datetime.timedelta(seconds=10)
+
         event = self.get_object()
         if event.is_stopped:
             return Response({'detail': 'Event has ended'}, status=status.HTTP_400_BAD_REQUEST)
+
+        drink_events = request.user.get_drink_events(event).order_by('datetime')
+        if drink_events.exists():
+            last_dt = drink_events.last().datetime
+            if timezone.now() - last_dt < MINIMUM_DURATION:
+                return Response({'detail': 'Too soon, try again later'}, status=status.HTTP_400_BAD_REQUEST)
 
         drinkevent = DrinkEvent.objects.create(user=request.user, event=self.get_object())
         return Response({'id': drinkevent.id})
