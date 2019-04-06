@@ -4,3 +4,5 @@ db.sqlite3
 .idea/
 backendsnaps.egg-info/
 pip-wheel-metadata/
+.env
+static/
