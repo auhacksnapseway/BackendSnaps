@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 from .models import Event, DrinkEvent
-from .serializers import UserSerializer, EventSerializer, DrinkEventSerializer
+from .serializers import UserSerializer, EventSerializer, DrinkEventSerializer, CreateEventSerializer
 
 
 User = get_user_model()
@@ -21,6 +21,17 @@ class EventViewSet(viewsets.ModelViewSet):
 	permission_classes = (IsAuthenticated,)
 	queryset = Event.objects
 	serializer_class = EventSerializer
+
+	@action(detail=False, methods=['post'])
+	def create_event(self, request):
+		s = CreateEventSerializer(data=request.data)
+		if not s.is_valid():
+			return Response({'success': False})
+
+		event = Event.objects.create(owner=request.user, name=s.validated_data['name'])
+		event.users.add(request.user)
+
+		return Response({'success': True})
 
 	@action(detail=True, methods=['post'])
 	def join_event(self, request, pk=None):

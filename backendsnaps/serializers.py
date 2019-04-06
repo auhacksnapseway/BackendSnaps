@@ -21,3 +21,7 @@ class DrinkEventSerializer(serializers.HyperlinkedModelSerializer):
 	class Meta:
 		model = DrinkEvent
 		fields = ('user', 'event', 'datetime')
+
+
+class CreateEventSerializer(serializers.Serializer):
+	name = serializers.CharField()
