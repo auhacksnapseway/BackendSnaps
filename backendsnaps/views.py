@@ -12,7 +12,16 @@ from .serializers import UserSerializer, EventSerializer, DrinkEventSerializer, 
 User = get_user_model()
 
 
+class CreateOrAuthenticated(IsAuthenticated):
+	def has_permission(self, request, view):
+		if request.method == 'POST':
+			return True
+
+		return super().has_permission(request, view)
+
+
 class UserViewSet(viewsets.ModelViewSet):
+	permission_classes = (CreateOrAuthenticated,)
 	queryset = User.objects
 	serializer_class = UserSerializer
 
@@ -55,6 +64,7 @@ class EventViewSet(viewsets.ModelViewSet):
 
 
 class DrinkEventViewSet(viewsets.ModelViewSet):
+	permission_classes = (IsAuthenticated,)
 	queryset = DrinkEvent.objects
 	serializer_class = DrinkEventSerializer
 
