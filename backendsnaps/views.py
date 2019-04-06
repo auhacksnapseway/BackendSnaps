@@ -3,7 +3,7 @@ import json
 from django.contrib.auth import get_user_model
 from django.shortcuts import render
 
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -21,6 +21,16 @@ class CreateOrAuthenticated(IsAuthenticated):
             return True
 
         return super().has_permission(request, view)
+
+
+class OwnsEvent(IsAuthenticated):
+    def has_object_permission(self, request, view, obj):
+        return obj.owner == request.user
+
+
+class InEvent(IsAuthenticated):
+    def has_object_permission(self, request, view, obj):
+        return obj.users.filter(pk=request.user.id).exists()
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -41,7 +51,7 @@ class EventViewSet(viewsets.ModelViewSet):
     def create(self, request):
         s = CreateEventSerializer(data=request.data)
         if not s.is_valid():
-            return Response({'success': False})
+            return Response({'detail': 'name parameter is probably bad'}, status=status.HTTP_400_BAD_REQUEST)
 
         event = Event.objects.create(owner=request.user, name=s.validated_data['name'])
         event.users.add(request.user)
@@ -52,10 +62,10 @@ class EventViewSet(viewsets.ModelViewSet):
     def join(self, request, pk=None):
         event = self.get_object()
         if event.users.filter(pk=request.user.id).exists():
-            return Response({'success': False, 'error': 'User has already joined the event'})
+            return Response({'detail': 'User has already joined the event'}, status=status.HTTP_400_BAD_REQUEST)
 
         if event.is_stopped:
-            return Response({'success': False, 'error': 'Event has ended'})
+            return Response({'detail': 'Event has ended'}, status=status.HTTP_400_BAD_REQUEST)
 
         event.users.add(request.user)
         return Response({'success': True})
@@ -64,25 +74,25 @@ class EventViewSet(viewsets.ModelViewSet):
     def leave(self, request, pk=None):
         event = self.get_object()
         if not event.users.filter(pk=request.user.id).exists():
-            return Response({'success': False, 'error': 'User is not in the event'})
+            return Response({'detail': 'User is not in the event'}, status=status.HTTP_400_BAD_REQUEST)
 
         event.users.remove(request.user)
         return Response({'success': True})
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], permission_classes=(OwnsEvent,))
     def stop(self, request, pk=None):
         event = self.get_object()
         if event.is_stopped:
-            return Response({'success': False, 'error': 'Event has already been stopped'})
+            return Response({'detail': 'Event has already been stopped'}, status=status.HTTP_400_BAD_REQUEST)
 
         event.stop()
         return Response({'success': True})
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], permission_classes=(InEvent,))
     def create_drinkevent(self, request, pk=None):
         event = self.get_object()
         if event.is_stopped:
-            return Response({'success': False, 'error': 'Event has ended'})
+            return Response({'detail': 'Event has ended'}, status=status.HTTP_400_BAD_REQUEST)
 
         drinkevent = DrinkEvent.objects.create(user=request.user, event=self.get_object())
         return Response({'success': True, 'id': drinkevent.id})
@@ -103,6 +113,7 @@ class DrinkEventViewSet(viewsets.ModelViewSet):
                 qs = qs.filter(**{k: self.request.GET[k]})
 
         return qs
+
 
 def get_user_data():
     factory = APIRequestFactory()
