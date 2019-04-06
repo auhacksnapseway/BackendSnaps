@@ -1,0 +1,83 @@
+<!doctype html>
+<head>
+	<title>Look at me, I am the chart now!</title>
+	<script src="https://cdn.jsdelivr.net/npm/moment@2.24.0/moment.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+</head>
+<body>
+	<h1>Hello</h1>
+	<canvas id="chart"></canvas>
+	<script>
+		var colors = ['006BA4', 'FF800E', 'ABABAB', '595959', '5F9ED1', 'C85200', '898989', 'A2C8EC', 'FFBC79', 'CFCFCF'];
+
+		var event_data = JSON.parse('{{event_data | escapejs}}');
+
+		var drink_events = event_data['drink_events'];
+
+		drink_events.sort(function (e1, e2) {
+			return e1.user - e2.user;
+		});
+
+		var usernames = {};
+		for (var i = 0; i < event_data.users.length; i++) {
+			var user = event_data.users[i];
+			usernames[user.id] = user.username;
+		}
+
+		var user_index = {};
+		var datasets = [];
+
+		for (var i = 0; i < drink_events.length; i++) {
+			var user_id = drink_events[i].user;
+			var date = new Date(drink_events[i].datetime);
+
+			if (!user_index.hasOwnProperty(user_id)) {
+				user_index[user_id] = datasets.length;
+				datasets.push({
+					label: usernames[user_id],
+					showLine: true,
+					fill: false,
+					pointBorderColor: '#' + colors[user_index[user]],
+					pointBackgroundColor: '#' + colors[user_index[user]],
+					backgroundColor: '#' + colors[user_index[user]],
+					borderColor: '#' + colors[user_index[user]],
+					data: [],
+				});
+			}
+
+			var user_data = datasets[user_index[user_id]].data;
+
+			user_data.push({
+				x: date,
+				y: user_data.length + 1,
+			});
+		}
+
+		var ctx = document.getElementById('chart').getContext('2d');
+		var chart = new Chart(ctx, {
+			type: 'scatter',
+
+			// The data for our dataset
+			data: {
+				//labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+				datasets: datasets,
+			},
+
+			// Configuration options go here
+			options: {
+				scales: {
+					xAxes: [{
+						type: 'time',
+						time: {
+							displayFormats: {
+								millisecond: 'HH:mm:ss.SSS',
+								second: 'HH:mm:ss',
+								minute: 'HH:mm',
+							},
+						},
+					}],
+				},
+			},
+		});
+	</script>
+</body>

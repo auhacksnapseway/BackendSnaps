@@ -24,6 +24,12 @@ class UserSerializer(serializers.ModelSerializer):
 		return user
 
 
+class UserIdAndUsernameSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = User
+		fields = ('id', 'username')
+
+
 class DrinkEventSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = DrinkEvent
@@ -32,6 +38,7 @@ class DrinkEventSerializer(serializers.ModelSerializer):
 
 class EventSerializer(serializers.ModelSerializer):
 	drink_events = DrinkEventSerializer(many=True, read_only=True)
+	users = UserIdAndUsernameSerializer(many=True, read_only=True)
 
 	class Meta:
 		model = Event

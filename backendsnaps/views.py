@@ -1,9 +1,13 @@
+import json
+
 from django.contrib.auth import get_user_model
+from django.shortcuts import render
 
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.test import APIRequestFactory, force_authenticate
 
 from .models import Event, DrinkEvent
 from .serializers import UserSerializer, EventSerializer, DrinkEventSerializer, CreateEventSerializer
@@ -77,3 +81,20 @@ class DrinkEventViewSet(viewsets.ModelViewSet):
 				qs = qs.filter(**{k: self.request.GET[k]})
 
 		return qs
+
+
+def index(request):
+	factory = APIRequestFactory()
+	user = User.objects.get(username='test')
+	view = EventViewSet.as_view({'get': 'retrieve'})
+
+	request = factory.get('/events/')
+	force_authenticate(request, user=user)
+	response = view(request, pk=1)
+	data = response.data
+
+	context = {
+		'event_data': json.dumps(data),
+	}
+
+	return render(request, 'chart.html', context)
