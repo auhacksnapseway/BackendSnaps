@@ -36,7 +36,7 @@ class DrinkEvent(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='drink_events')
 	event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='drink_events')
 
-	datetime = models.DateTimeField()
+	datetime = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
 		return f'{self.user} ({self.datetime})'
