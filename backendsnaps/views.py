@@ -39,7 +39,7 @@ class EventViewSet(viewsets.ModelViewSet):
 		event = Event.objects.create(owner=request.user, name=s.validated_data['name'])
 		event.users.add(request.user)
 
-		return Response({'success': True})
+		return Response({'success': True, 'id': event.id})
 
 	@action(detail=True, methods=['post'])
 	def join(self, request, pk=None):
@@ -58,8 +58,8 @@ class EventViewSet(viewsets.ModelViewSet):
 
 	@action(detail=True, methods=['post'])
 	def create_drinkevent(self, request, pk=None):
-		DrinkEvent.objects.create(user=request.user, event=self.get_object())
-		return Response({'success': True})
+		drinkevent = DrinkEvent.objects.create(user=request.user, event=self.get_object())
+		return Response({'success': True, 'id': drinkevent.id})
 
 
 class DrinkEventViewSet(viewsets.ModelViewSet):
