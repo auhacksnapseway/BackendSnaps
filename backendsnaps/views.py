@@ -93,7 +93,6 @@ class EventViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], permission_classes=(InEvent,))
     def create_drinkevent(self, request, pk=None):
-        print("---Drink EVENT Creation---")
         MINIMUM_DURATION = datetime.timedelta(seconds=10)
 
         event = self.get_object()
@@ -107,8 +106,6 @@ class EventViewSet(viewsets.ModelViewSet):
                 return Response({'detail': 'Too soon, try again later'}, status=status.HTTP_400_BAD_REQUEST)
 
         drinkevent = DrinkEvent.objects.create(user=request.user, event=self.get_object())
-        #event.update_owner()
-
         return Response({'id': drinkevent.id})
 
 

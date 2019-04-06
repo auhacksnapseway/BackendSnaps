@@ -1,4 +1,4 @@
-from random import random
+import random
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -43,11 +43,13 @@ class Event(models.Model):
 			best_score = 0; best_performer = None
 			for participant in event_participants:
 				cur_score = participant.get_score(self)
-				if best_score < cur_score:
+				if best_score < cur_score and participant != self.owner:
 					best_score = cur_score
 					best_performer = participant
 			if best_performer is not None:
+				self.owner = None
 				self.owner = best_performer
+
 
 #todo: 1)owner is not None 2) move prev owner into participants 3) check users is not None, #do nothing if owner is highest
 
@@ -60,3 +62,6 @@ class DrinkEvent(models.Model):
 	def __str__(self):
 		return f'{self.user} ({self.datetime})'
 
+	def save(self, **kwargs):
+		super().save(**kwargs)
+		self.event.update_owner()
