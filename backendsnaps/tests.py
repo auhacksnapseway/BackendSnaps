@@ -7,7 +7,7 @@ from .models import Event
 User = get_user_model()
 
 
-def create_test_user(t):
+def create_test_user():
 	user = User.objects.create(username='test')
 	user.set_password('test')
 	user.save()
@@ -16,7 +16,6 @@ def create_test_user(t):
 	user2.set_password('test')
 	user2.save()
 
-	t.assertEqual(user, user2)
 
 def get_test_token(t):
 	create_test_user()
