@@ -54,6 +54,9 @@ class EventViewSet(viewsets.ModelViewSet):
         if event.users.filter(pk=request.user.id).exists():
             return Response({'success': False, 'error': 'User has already joined the event'})
 
+        if event.is_stopped:
+            return Response({'success': False, 'error': 'Event has ended'})
+
         event.users.add(request.user)
         return Response({'success': True})
 
@@ -68,11 +71,19 @@ class EventViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def stop(self, request, pk=None):
-        self.get_object().stop()
+        event = self.get_object()
+        if event.is_stopped:
+            return Response({'success': False, 'error': 'Event has already been stopped'})
+
+        event.stop()
         return Response({'success': True})
 
     @action(detail=True, methods=['post'])
     def create_drinkevent(self, request, pk=None):
+        event = self.get_object()
+        if event.is_stopped:
+            return Response({'success': False, 'error': 'Event has ended'})
+
         drinkevent = DrinkEvent.objects.create(user=request.user, event=self.get_object())
         return Response({'success': True, 'id': drinkevent.id})
 
