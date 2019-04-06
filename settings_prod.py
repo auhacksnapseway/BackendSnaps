@@ -8,3 +8,6 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = False
 
 ALLOWED_HOSTS = ['api.schnappsapp.com']
+
+STATIC_URL = '/static/'
+STATIC_ROOT = 'static'
