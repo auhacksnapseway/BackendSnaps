@@ -13,16 +13,7 @@ class LoginTestCase(TestCase):
 		user.set_password('test')
 		user.save()
 
-		factory = APIRequestFactory()
-		r = factory.post('/api-auth/login/', {'username': 'test', 'password': 'test'})
-		print(r)
-		print(str(r.content, 'utf-8'))
-
-		'''
 		c = Client()
-		r = c.post('/api-auth/login/', {'username': 'test', 'password': 'test'})
-		print(str(r.content, 'utf-8'))
-		'''
+		r = c.post('/api-token-auth/', {'username': 'test', 'password': 'test'})
 
-
-# Create your tests here.
+		self.assetEqual(r.status_code, 200)
