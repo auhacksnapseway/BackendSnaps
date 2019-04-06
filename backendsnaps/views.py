@@ -46,12 +46,20 @@ class EventViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def join(self, request, pk=None):
-        self.get_object().users.add(request.user)
+        event = self.get_object()
+        if event.users.filter(pk=request.user.id).exists():
+            return Response({'success': False, 'error': 'User has already joined the event'})
+
+        event.users.add(request.user)
         return Response({'success': True})
 
     @action(detail=True, methods=['post'])
     def leave(self, request, pk=None):
-        self.get_object().users.remove(request.user)
+        event = self.get_object()
+        if not event.users.filter(pk=request.user.id).exists():
+            return Response({'success': False, 'error': 'User is not in the event'})
+
+        event.users.remove(request.user)
         return Response({'success': True})
 
     @action(detail=True, methods=['post'])
