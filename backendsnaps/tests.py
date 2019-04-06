@@ -14,7 +14,6 @@ def create_test_user():
 	user.save()
 
 
-
 def get_test_token_user(t):
 	create_test_user()
 
@@ -26,13 +25,12 @@ def get_test_token_user(t):
 	return r.json()['token']
 
 
-
 class LoginTestCase(TestCase):
-	def setUp(self):
-		token = get_test_token_user(self)
-
-	def test_login(self):
-		return None
+	def test_login_failure(self):
+		c = Client()
+		r = c.post('/api-token-auth/', {'username': 'testzzz', 'password': 'test'})
+		self.assertEqual(r.status_code, 400)
+		self.assertTrue(r.json()['non_field_errors'], 'Unable to log in with provided credentials.')
 
 
 class EventTestCase(TestCase):
@@ -57,5 +55,6 @@ class DrinkEventTestCase(TestCase):
 
 		self.assertEqual(r.status_code, 200)
 		self.assertTrue(r.json()['success'])
+
 
 
