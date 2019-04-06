@@ -56,7 +56,7 @@ class EventViewSet(viewsets.ModelViewSet):
         event = Event.objects.create(owner=request.user, name=s.validated_data['name'])
         event.users.add(request.user)
 
-        return Response({'success': True, 'id': event.id})
+        return Response({'id': event.id})
 
     @action(detail=True, methods=['post'])
     def join(self, request, pk=None):
@@ -68,7 +68,7 @@ class EventViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Event has ended'}, status=status.HTTP_400_BAD_REQUEST)
 
         event.users.add(request.user)
-        return Response({'success': True})
+        return Response({})
 
     @action(detail=True, methods=['post'])
     def leave(self, request, pk=None):
@@ -77,7 +77,7 @@ class EventViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'User is not in the event'}, status=status.HTTP_400_BAD_REQUEST)
 
         event.users.remove(request.user)
-        return Response({'success': True})
+        return Response({})
 
     @action(detail=True, methods=['post'], permission_classes=(OwnsEvent,))
     def stop(self, request, pk=None):
@@ -86,7 +86,7 @@ class EventViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Event has already been stopped'}, status=status.HTTP_400_BAD_REQUEST)
 
         event.stop()
-        return Response({'success': True})
+        return Response({})
 
     @action(detail=True, methods=['post'], permission_classes=(InEvent,))
     def create_drinkevent(self, request, pk=None):
@@ -95,7 +95,7 @@ class EventViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Event has ended'}, status=status.HTTP_400_BAD_REQUEST)
 
         drinkevent = DrinkEvent.objects.create(user=request.user, event=self.get_object())
-        return Response({'success': True, 'id': drinkevent.id})
+        return Response({'id': drinkevent.id})
 
 
 class DrinkEventViewSet(viewsets.ModelViewSet):
