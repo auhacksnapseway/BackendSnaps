@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
 from .models import Event, DrinkEvent
 from .serializers import UserSerializer, EventSerializer, DrinkEventSerializer
@@ -17,12 +18,18 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class EventViewSet(viewsets.ModelViewSet):
+	permission_classes = (IsAuthenticated,)
 	queryset = Event.objects
 	serializer_class = EventSerializer
 
-	@action(detail=False, methods=['post'])
-	def join_event(self, request):
-		self.get_object().users.add(self.user)
+	@action(detail=True, methods=['post'])
+	def join_event(self, request, pk=None):
+		self.get_object().users.add(request.user)
+		return Response({'success': True})
+
+	@action(detail=True, methods=['post'])
+	def leave_event(self, request, pk=None):
+		self.get_object().users.remove(request.user)
 		return Response({'success': True})
 
 
