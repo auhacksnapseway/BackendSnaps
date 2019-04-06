@@ -12,6 +12,7 @@ djangorestframework = "^3.9"
 django-extensions = "^2.1"
 ipython = "^7.4"
 werkzeug = "^0.15.2"
+django-cors-headers = "^2.5"
 
 [tool.poetry.dev-dependencies]
 
