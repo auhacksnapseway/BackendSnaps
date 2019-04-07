@@ -58,6 +58,7 @@ class Event(models.Model):
             #owner should be participant
             if best_performer is not None:
                 self.owner = best_performer
+                self.save()
 
 
 class DrinkEvent(models.Model):
