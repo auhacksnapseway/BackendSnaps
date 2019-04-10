@@ -9,5 +9,5 @@ DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
-STATIC_URL = '/static/'
+STATIC_URL = '/static_api/'
 STATIC_ROOT = 'static'
