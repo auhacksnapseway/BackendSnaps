@@ -7,7 +7,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['api.schnappsapp.com', 'snaps-api.dropud.nu']
+ALLOWED_HOSTS = ['localhost:4433']
 
 STATIC_URL = '/static/'
 STATIC_ROOT = 'static'
