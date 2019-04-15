@@ -44,11 +44,11 @@ class Event(models.Model):
     def update_owner(self):
         latest_drink_event = self.owner.drink_events.order_by('datetime').last()
         one_hour_extra = timezone.now() + timezone.timedelta(hours=1)
-        diff_minutes = (one_hour_extra - latest_drink_event.datetime).seconds // 60
+        diff_minutes = (one_hour_extra - latest_drink_event.datetime).seconds / 60
         chad_check = random.uniform(59.5, 120.5)
-        if diff_minutes < chad_check:
+        if diff_minutes > chad_check:
             event_participants = self.users.all()
-            best_score = 0;
+            best_score = 0
             best_performer = None
             for participant in event_participants:
                 cur_score = participant.get_score(self)
