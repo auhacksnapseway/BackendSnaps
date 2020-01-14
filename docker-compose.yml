@@ -1,23 +1,21 @@
-version: "3"
+version: "3.7"
 
 services:
   app:
     build: .
     restart: always
     networks:
-      - web
+      - traefik
       - default
     volumes:
       - ./.env:/app/.env
     expose:
-      - "8000"
+      - 8000
     labels:
-      - "traefik.enable=true"
-      - "traefik.backend=api.snaps.dropud.nu"
-      - "traefik.frontend.rule=Host:api.snaps.dropud.nu"
-      - "traefik.port=8000"
-      - "traefik.docker.network=web"
-      - "traefik.domain=api.snaps.dropud.nu"
+      - traefik.enable=true
+      - traefik.http.routers.api-snaps-dropud-nu.rule=Host(`api.snaps.dropud.nu`)
+      - traefik.http.routers.api-snaps-dropud-nu.tls.certResolver=le
+      - traefik.http.services.api-snaps-dropud-nu.loadbalancer.server.port=8000
     container_name: api.snaps.dropud.nu
     depends_on:
       - db
@@ -26,5 +24,5 @@ services:
     image: postgres:12
 
 networks:
-  web:
+  traefik:
     external: true
