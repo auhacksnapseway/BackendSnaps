@@ -1,7 +1,7 @@
 FROM python:3.8
 
 RUN pip install poetry
-RUN poetry config settings.virtualenvs.create false
+RUN poetry config virtualenvs.create false
 
 WORKDIR /app
 
