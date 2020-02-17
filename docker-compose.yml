@@ -3,21 +3,17 @@ version: "3.7"
 services:
   app:
     image: api-snaps-dropud-nu
-    restart: always
     networks:
       - traefik
       - default
     volumes:
       - ./.env:/app/.env
-    expose:
-      - 8000
     deploy:
       labels:
         - traefik.enable=true
         - traefik.http.routers.api-snaps-dropud-nu.rule=Host(`api.snaps.dropud.nu`)
         - traefik.http.routers.api-snaps-dropud-nu.tls.certResolver=le
         - traefik.http.services.api-snaps-dropud-nu.loadbalancer.server.port=8000
-    container_name: api.snaps.dropud.nu
     depends_on:
       - db
 
