@@ -12,7 +12,6 @@ services:
       labels:
         - traefik.enable=true
         - traefik.http.routers.api-snaps-dropud-nu.rule=Host(`api.snaps.dropud.nu`)
-        - traefik.http.routers.api-snaps-dropud-nu.tls.certResolver=le
         - traefik.http.services.api-snaps-dropud-nu.loadbalancer.server.port=8000
     depends_on:
       - db
